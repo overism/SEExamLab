@@ -1,0 +1,191 @@
+/* ---------- Paper 09 — Gridwise Smart Network (generated from p09.tpl.js by gen/p09.py) ---------- */
+{
+const {mc, multi, rows, cr, written, python, sql, diagram, twoOf, Q, paper} = H;
+const readings = {name:'Readings', columns:['ReadingID','Suburb','Hour','KWh'], rows:[
+  [1,'Ashfield',8,1.2],[2,'Ashfield',9,null],[3,'Ashfield',10,0.8],[4,'Ashfield',11,2.0],
+  [5,'Bexley',8,3.0],[6,'Bexley',9,2.5],[7,'Bexley',10,null],[8,'Bexley',11,null],[9,'Bexley',12,1.5],
+  [10,'Carlton',8,0.9],[11,'Carlton',9,1.1],[12,'Carlton',10,1.0],
+  [13,'Dunmore',8,null],[14,'Dunmore',9,null],[15,'Dunmore',10,null],[16,'Dunmore',11,2.0]]};
+const readingsHidden = [[1,'Ashfield',8,2.0],[2,'Ashfield',9,2.0],[3,'Ashfield',10,null],[4,'Ashfield',11,null],
+  [5,'Bexley',8,5.0],[6,'Bexley',9,5.0],[7,'Bexley',10,5.0],
+  [8,'Carlton',8,1.0],[9,'Carlton',9,1.0],[10,'Carlton',10,1.0],[11,'Carlton',11,1.0],[12,'Carlton',12,1.0],[13,'Carlton',13,1.0],
+  [14,'Dunmore',8,null],[15,'Dunmore',9,null],[16,'Dunmore',10,null],[17,'Dunmore',11,null]];
+
+NEW.push(paper(9, 'Gridwise Smart Network', 'Smart-meter data, web portals, secure firmware and machine learning', [
+Q(1, 'Prototyping', `Before building the Gridwise control-room dashboard, the team creates a quick set of screens using invented data so operators can confirm the layout. Once the layout is agreed, the screens will be discarded and the real dashboard built from scratch.`, [
+  mc('Which approach is being used?', ['Throw-away (rapid) prototyping', 'Evolutionary prototyping', 'Pilot implementation', 'Parallel implementation'], 0, 'the prototype exists only to clarify requirements and is not developed into the final product.')]),
+Q(2, 'Code tracing', `loads = [40, 55, 90, 30, 95, 20]\nlimit = 85\ncount = 0\ni = 0\nwhile i < len(loads):\n    if loads[i] > limit:\n        count += 1\n        i += 2\n    else:\n        i += 1\nprint(count, i)`, [
+  mc('What does this program display?', ['3 6', '2 7', '2 6', '2 5'], 2, 'i visits 0, 1, 2 (90 counted, jump to 4), 4 (95 counted, jump to 6); the loop ends with i = 6.')]),
+Q(3, 'Encoding, hashing and encryption', `A developer stores each smart-meter API key in a configuration file as a Base64 string and describes the keys as "encrypted".`, [
+  mc('Which statement is correct?', ['Base64 is a one-way hash, so the keys cannot be recovered from the file', 'Base64 is an encoding, not encryption: anyone can decode it, so the keys are effectively exposed', 'Base64 is a form of symmetric encryption that is secure if the file is not published', 'Base64 adds a salt so every key is stored differently'], 1, 'encoding changes representation without a secret key; it provides no confidentiality.')]),
+Q(4, 'Interpreting unsupervised learning', `A k-means algorithm with k = 3 is run on the 24-hour consumption profiles of 5,000 homes. Cluster A (2,100 homes) peaks in the evening, cluster B (1,900 homes) has a flat profile, and cluster C (1,000 homes) peaks at midday and includes many homes with rooftop solar. The profiles were not labelled in advance.`, [
+  mc('Which conclusion is valid?', ['Cluster C homes are faulty because their pattern differs from the others', 'The algorithm was told in advance which homes belong in each cluster', 'Using k = 3 proves that there are exactly three types of household', 'The algorithm grouped similar profiles without labels, so analysts must interpret what each cluster represents'], 3, 'unsupervised learning finds structure; meaning is supplied by people, and k is a choice made by the analyst.')]),
+Q(5, 'Session cookies', `A site sets its session cookie with the attributes: Secure; HttpOnly; SameSite=Strict. An attacker has managed to store a script in a comment field that runs in other users' browsers.`, [
+  mc('Which attribute prevents that script from reading the session cookie using document.cookie?', ['HttpOnly', 'Secure', 'SameSite=Strict', 'Domain'], 0, 'HttpOnly hides the cookie from JavaScript; Secure limits it to HTTPS and SameSite limits cross-site sending.')]),
+Q(6, 'Referential integrity', `The Meters table has a foreign key SuburbID that refers to Suburbs.SuburbID. A technician tries to delete suburb 12 while 340 meters still refer to it. The foreign key uses the default restricting behaviour.`, [
+  mc('What happens?', ['The 340 meters are deleted automatically', 'The 340 meters have their SuburbID set to 0', 'The suburb is deleted and the meters remain with a SuburbID that matches nothing', 'The database rejects the deletion because meters still refer to the suburb'], 3, 'a restricting foreign key preserves referential integrity by refusing the delete.')]),
+Q(7, 'Responsive design', `.panel { width: 900px; }\n@media (max-width: 600px) {\n    .panel { width: 100%; }\n}`, [
+  mc('A phone with a 400 px wide viewport loads the page. What width does .panel use, and why?', ['900px, because fixed widths override media queries', '100%, because the viewport is narrower than 600 px so the media-query rule applies', '600px, because that is the breakpoint', '100%, because mobile browsers ignore pixel widths'], 1, 'the media query matches when the viewport is at most 600 px wide, and its later rule overrides the earlier width.')]),
+Q(8, 'Interpreting training results', `Training of a fault-prediction neural network produced these losses (lower is better).\n\nEpoch | Training loss | Validation loss\n1 | 0.90 | 0.92\n5 | 0.40 | 0.45\n10 | 0.18 | 0.41\n15 | 0.07 | 0.52\n20 | 0.02 | 0.66`, [
+  mc('What should the team do?', ['Train for longer, because the training loss is still falling', 'Add more layers so the training loss falls further', 'Stop near epoch 10, or add regularisation or more varied data, because the validation loss rises as the network overfits', 'Report the training loss as the expected accuracy on new data'], 2, 'rising validation loss while training loss falls indicates overfitting; performance on unseen data is what matters.')]),
+Q(9, 'Requirements', '', [
+  rows('Classify each requirement as functional or non-functional.', [['Meters report consumption every 15 minutes', 'Functional'], ['The dashboard must be available 99.9% of the time', 'Non-functional'], ['An operator can issue a remote disconnect for a meter', 'Functional'], ['All customer readings must be encrypted in transit', 'Non-functional']], ['Functional', 'Non-functional'], 1, [4])]),
+Q(10, 'Limiting the impact of a stolen token', '', [
+  multi('Which measures reduce the damage if an API token is stolen? Select all that apply.', ['Give the token a short expiry time', 'Pass the token in the URL query string so it is easy to log', 'Restrict the token to the minimum permissions needed', 'Make the token never expire so users stay logged in', 'Provide a way to revoke the token immediately'], [0, 2, 4], 'URLs are stored in logs and histories, and tokens that never expire cannot be contained.')]),
+Q(11, 'Types of machine learning', '', [
+  multi('Which are examples of unsupervised learning? Select all that apply.', ['Training with examples that are each labelled with the correct answer', 'Finding structure in data that has no labels', 'Segmenting customers by their consumption pattern', 'Predicting a house price from labelled past sales', 'Detecting unusual meter behaviour by finding readings that do not fit the usual groupings'], [1, 2, 4], 'unsupervised methods find groups or outliers without labelled outcomes.')]),
+Q(12, 'Web concepts', '', [
+  rows('Select the term that matches each description.', [
+    ['Small data stored in the browser and sent with each request to the same site', 'Cookie'],
+    ['A server-side record of a logged-in user\'s state, found using an identifier', 'Session'],
+    ['Keeps copies of responses so that repeated requests are quicker', 'Cache'],
+    ['A defined interface through which one program requests data or actions from another', 'API'],
+    ['Geographically distributed servers that deliver static files from near the user', 'CDN'],
+    ['Spreads incoming requests across several servers', 'Load balancer']],
+    ['Cookie', 'Session', 'Cache', 'API', 'CDN', 'Load balancer'], 2, [6, 4])]),
+Q(13, 'Sources of bias', '', [
+  rows('Select the type of bias that best describes each situation.', [
+    ['A theft-detection model was trained only on suburbs that have smart meters', 'Selection (sampling) bias'],
+    ['Engineers who expected theft in some suburbs labelled ambiguous readings as theft', 'Label bias'],
+    ['Operators accept every alert the model raises without checking it', 'Automation bias'],
+    ['The team reports only the test results that support their model', 'Confirmation bias']],
+    ['Selection (sampling) bias', 'Label bias', 'Confirmation bias', 'Automation bias'], 2, [4, 2])]),
+Q(14, 'Python expressions', '', [
+  rows('Select the result of each Python expression.', [['len(set([3, 1, 3, 2]))', '3'], ['[x * 2 for x in range(3)]', '[0, 2, 4]'], ['"smart"[1:3]', 'ma']], ['3', '4', '[0, 2, 4]', '[2, 4, 6]', 'ma', 'mar'], 1, [3])]),
+Q(15, 'Security properties and project scheduling', `Gridwise is delivering a new meter-reading system. The project plan is shown on a Gantt chart. The delivery of meter hardware, which many later tasks depend on, is now two weeks late.`, [
+  rows('Match each situation to the security property it protects.', [
+    ['A hash check shows that a meter firmware file has not been altered', 'Integrity'],
+    ['Customer usage data is encrypted so unauthorised parties cannot read it', 'Confidentiality'],
+    ['The control room stays usable during a flood of malicious requests', 'Availability'],
+    ['A technician logs in using a password and a one-time code', 'Authentication'],
+    ['A technician can view tariffs but cannot change them', 'Authorisation'],
+    ['A log shows which account reset a meter', 'Accountability']],
+    ['Integrity', 'Confidentiality', 'Availability', 'Authentication', 'Authorisation', 'Accountability'], 3, [6, 5, 3]),
+  written('Explain how a Gantt chart that shows task dependencies helps the project manager respond to the late delivery of the meter hardware.', 3, 90,
+    'A Gantt chart shows each task with its start date and duration, and the dependencies show which later tasks cannot begin until the hardware arrives. The project manager can therefore see exactly which tasks will be delayed by two weeks and whether the late task lies on the critical path, which determines whether the overall finish date moves. The manager can then reschedule tasks that do not depend on the hardware, or allocate extra staff to critical tasks, to reduce the overall delay.',
+    [cr('Explains that a Gantt chart shows tasks, dates or durations', ['gantt|chart', 'task|duration|start|date|schedule|timeline']),
+     cr('Explains that dependencies identify which tasks are affected or critical', 'depend|critical path|cannot begin|cannot start|affected|knock.on|delayed tasks'),
+     cr('Explains how the manager responds', 'reschedul|reallocat|extra staff|resources|reorder|adjust|re-?plan|parallel')])]),
+Q(16, 'Web portal design', `The Gridwise customer portal is a responsive web application. A JavaScript front end shows a live graph of the household's usage, the current tariff and an outage map. It gets its data from a REST API. The portal's database holds hundreds of millions of 15-minute readings.`, [
+  written('Explain how client-side JavaScript and the server together allow the usage graph to update without reloading the page.', 3, 90,
+    'JavaScript running in the customer\'s browser can send a background request to the API at regular intervals, without reloading the page. The server authenticates the request, queries the database for the newest readings and returns them as JSON. The JavaScript then updates the graph in the page using the new data, so only the graph changes and the rest of the page stays as it is.',
+    [cr('Explains that client-side JavaScript makes a background request', ['javascript|script|client|browser', 'background|asynchronous|fetch|ajax|request|interval|poll']),
+     cr('Explains the server\'s role in providing the data', ['server|api', 'database|json|query|returns?|authenticat|readings']),
+     cr('Explains that the page is updated without a reload', 'without reload|update|only the graph|dom|refresh the graph|re-?draw|rest of the page')]),
+  written('Explain how responsive design allows the portal to be used on phones, tablets and desktop computers.', 3, 90,
+    'Responsive design uses flexible layouts, with widths set in percentages or relative units rather than fixed pixels, so content resizes to fit the screen. CSS media queries detect the width of the viewport and apply different rules, for example stacking the usage graph above the tariff panel on a phone but placing them side by side on a desktop. Images and charts also scale with their container, so one codebase serves all devices and customers do not need to zoom or scroll sideways.',
+    [cr('Explains flexible or relative layouts', 'flexible|relative|percent|fluid|grid|flexbox|resiz|scale'),
+     cr('Explains media queries or breakpoints applying different rules', ['media quer|breakpoint|viewport|screen width', 'rule|layout|stack|side by side|different|apply']),
+     cr('Links the design to the devices or users', 'phone|tablet|desktop|device|one codebase|zoom|scroll|customers')]),
+  written('Outline TWO ways the portal\'s database could be designed or tuned so that usage queries stay fast with hundreds of millions of readings.', 3, 100,
+    'The database can have an index on the meter identifier and timestamp columns, so a query for one home\'s readings in a date range goes directly to the relevant rows instead of scanning the whole table. It can also store pre-calculated daily or monthly summaries, so the graph of a year\'s usage reads a few hundred summary rows rather than millions of 15-minute readings.',
+    [cr('Identifies a valid technique', 'index|summar|aggregat|partition|archive|pre-?calculat|limit(ing)? the date|date range|normalis|cach'),
+     cr('Identifies a second, different technique', twoOf('index', 'summar|aggregat|pre-?calculat', 'partition|archive', 'cach', 'limit(ing)? the date|date range|paginat')),
+     cr('Explains why this makes queries faster', 'instead of|rather than|directly|fewer|scan|avoid|reduce|faster|less data')])]),
+Q(17, 'Algorithm design', `The array Usage[0..23] holds the kilowatt-hours used in each hour of a day, where index 0 is midnight to 1 am.`, [
+  written('Construct pseudocode that displays the hour with the highest usage, and also displays "Peak alert" if that highest usage is more than 1.5 times the average usage of the 24 hours.', 3, 120,
+    'total ← 0\npeakHour ← 0\nFOR h ← 0 TO 23\n    total ← total + Usage[h]\n    IF Usage[h] > Usage[peakHour] THEN\n        peakHour ← h\n    ENDIF\nENDFOR\naverage ← total / 24\nDISPLAY peakHour\nIF Usage[peakHour] > 1.5 * average THEN\n    DISPLAY "Peak alert"\nENDIF',
+    [cr('Uses a loop to accumulate the total', ['for|while|loop|repeat', 'total|sum']),
+     cr('Finds the hour with the highest usage using a comparison', ['peak|highest|max|largest', '[<>]', 'hour|index|\\bh\\b|\\bi\\b']),
+     cr('Calculates the average and compares strictly with 1.5 times it', ['average|avg|mean|/\\s*24', '1\\.5', 'alert'], '[a-z_\\]]+\\s*>=\\s*1\\.5')])]),
+Q(18, 'Metadata and data mining', `Each smart meter sends a reading with metadata: meter identifier, timestamp, firmware version and a tamper flag. Gridwise suspects that some meters are being bypassed so that they under-record usage.`, [
+  written('Explain how data mining of the meter data and metadata could help identify meters that may have been tampered with.', 3, 90,
+    'Data mining can compare each meter\'s readings with the usual pattern for similar homes and for the same meter in the past, using the metadata such as timestamp and meter identifier. A meter whose recorded usage suddenly drops to near zero in the evenings, while neighbouring homes stay normal, is an anomaly that mining can flag, especially if its tamper flag or firmware version also looks unusual. Gridwise can then send a technician to inspect only the flagged meters rather than checking every meter.',
+    [cr('Identifies the metadata or data compared', 'metadata|timestamp|meter identifier|tamper flag|firmware|neighbour|similar homes|past readings'),
+     cr('Explains that mining detects anomalies or unusual patterns', ['mining|mine|analys', 'anomal|unusual|pattern|drop|outlier|deviat|differ']),
+     cr('Explains the action taken on flagged meters', 'inspect|technician|investigat|flag|check only|prioriti')])]),
+Q(19, 'Python programming: tariff calculation', `A time-of-use tariff charges for electricity according to the hour of the day:\n• Peak: hours 15 to 20 inclusive, $0.52 per kWh\n• Shoulder: hours 7 to 14 inclusive and hour 21, $0.31 per kWh\n• Off-peak: all other hours (22 to 23 and 0 to 6), $0.18 per kWh\n\nThe program reads the hour (a whole number) and then the energy used in kWh (a number). If the hour is not from 0 to 23 it displays Invalid hour. Otherwise, if the energy used is negative it displays Invalid usage. Otherwise it displays the band name and the cost, rounded to two decimal places.\n\nExample: hour 16 and 3.5 kWh displays Peak: $1.82`, [
+  python('Write a Python program that reads the hour and the energy used, and displays the result.', 3, '# Read the hour, then the kWh used\n',
+    '@SAMPLE19@',
+    [{name:'Worked example', stdin:'16\n3.5', expect:'Peak: $1.82'},
+     {name:'Off-peak overnight', stdin:'3\n10', expect:'Off-peak: $1.80'},
+     {name:'Hour 21 is shoulder', stdin:'21\n2', expect:'Shoulder: $0.62'},
+     {name:'Hour 14 is the last shoulder hour of the day', stdin:'14\n4', expect:'Shoulder: $1.24'},
+     {name:'Hour 15 starts peak', stdin:'15\n1', expect:'Peak: $0.52'},
+     {name:'Hour 20 is the last peak hour', stdin:'20\n1', expect:'Peak: $0.52'},
+     {name:'Hour 22 is off-peak', stdin:'22\n1', expect:'Off-peak: $0.18'},
+     {name:'Hours 6 and 7 are on either side of a boundary', stdin:'6\n1', expect:'Off-peak: $0.18'},
+     {name:'Hour 7 starts shoulder', stdin:'7\n1', expect:'Shoulder: $0.31'},
+     {name:'Hour out of range', stdin:'24\n1', expect:'Invalid hour'},
+     {name:'Negative hour', stdin:'-1\n1', expect:'Invalid hour'},
+     {name:'Negative usage', stdin:'10\n-2', expect:'Invalid usage'},
+     {name:'Invalid hour is reported before invalid usage', stdin:'30\n-2', expect:'Invalid hour'},
+     {name:'Zero usage', stdin:'16\n0', expect:'Peak: $0.00'}], {mutants:@MUT19@})]),
+Q(20, 'Availability and denial of service', `Customers report outages to Gridwise using an online form and an app. During a storm, an attacker floods the reporting service with automated requests.`, [
+  written('Explain how this denial-of-service attack could affect customers, and describe TWO ways Gridwise could reduce its impact.', 3, 100,
+    'The flood of automated requests uses up the service\'s capacity, so genuine customers cannot submit outage reports and Gridwise cannot see where power is out, which delays repairs and may leave vulnerable customers without help. Gridwise can apply rate limiting so that no single client or address can send more than a set number of requests, and it can use a load balancer or content delivery network with extra servers so that traffic is spread across more capacity.',
+    [cr('Explains that the attack exhausts capacity so the service is unavailable', 'flood|overwhelm|exhaust|capacity|unavailable|cannot (submit|access|report)|crash|slow'),
+     cr('Explains the effect on customers or repair response', ['customer|resident|vulnerable', 'delay|repair|help|report|outage|without']),
+     cr('Describes two mitigations', twoOf('rate.limit|throttl|limit(ing)? (the )?(number|requests)', 'load balanc|cdn|content delivery|extra servers|scal|redundan|spread', 'captcha|block|filter|firewall|blacklist|bot'))])]),
+Q(21, 'SQL: NULL handling and filtered groups', `The Readings table holds hourly readings. KWh is NULL when a meter did not report. For this question a missing reading counts as 0 kWh.`, [
+  sql('Construct a SQL query that displays, for each suburb with at least four readings (including missing readings), the Suburb, the number of readings and the average KWh per reading rounded to two decimal places, with missing readings counted as 0. Order the results from the highest to the lowest average.', 4, [readings],
+    "SELECT Suburb, COUNT(*) AS Readings, ROUND(AVG(COALESCE(KWh, 0)), 2) AS AvgKWh FROM Readings GROUP BY Suburb HAVING COUNT(*) >= 4 ORDER BY AvgKWh DESC",
+    {orderKeys:[2], hidden:[{Readings:readingsHidden}], weights:[0,2,1,1], expectedRows:[['Bexley',5,1.4],['Ashfield',4,1],['Dunmore',4,0.5]]})]),
+Q(22, 'Object-oriented class modelling', `A grid-management system holds the following classes. Each box lists the attributes of one class.\n\nSmartMeter: deviceId, location, firmware, meterType\nSolarInverter: deviceId, location, firmware, maxKw, panelCount\nBattery: deviceId, location, firmware, maxKw, capacityKwh\nEVCharger: deviceId, location, firmware, maxKw, connectorType`, [
+  diagram('Construct a class diagram that uses inheritance to remove all redundant attributes. Add any additional classes you need, and show a suitable data type (for example str, int or float) for each attribute.', 3,
+    {classes:[
+      {name:'GridDevice', alt:['Device','NetworkDevice','Equipment','Asset'], byAttrs:true, attrs:['deviceId','location','firmware'], parent:null},
+      {name:'SmartMeter', alt:['Smart Meter','Meter'], attrs:['meterType'], parent:'GridDevice'},
+      {name:'PowerDevice', alt:['PowerEquipment','PoweredDevice','PowerUnit','Powered'], byAttrs:true, attrs:['maxKw'], parent:'GridDevice'},
+      {name:'SolarInverter', alt:['Solar Inverter','Inverter'], attrs:['panelCount'], parent:'PowerDevice'},
+      {name:'Battery', attrs:['capacityKwh'], parent:'PowerDevice'},
+      {name:'EVCharger', alt:['EV Charger','Charger'], attrs:['connectorType'], parent:'PowerDevice'}],
+     types:{deviceId:'int', location:'str', firmware:'str', meterType:'str', maxKw:'float', panelCount:'int', capacityKwh:'float', connectorType:'str'}},
+    'GridDevice (deviceId: int, location: str, firmware: str)\n  ↑ SmartMeter (meterType: str)\n  ↑ PowerDevice (maxKw: float)\n      ↑ SolarInverter (panelCount: int)\n      ↑ Battery (capacityKwh: float)\n      ↑ EVCharger (connectorType: str)')]),
+Q(23, 'Smart-grid ethics and security', `Gridwise\'s Home Energy Coach app uses smart-meter data to suggest when customers should run appliances. It shares anonymised usage profiles with energy retailers. Gridwise can also remotely disconnect a meter. Meter firmware is updated over the network.`, [
+  written('Outline potential social and ethical issues associated with the Home Energy Coach and remote disconnection.', 3, 90,
+    'Fine-grained usage data can reveal when people are home, asleep or away, so sharing profiles with retailers, even in anonymised form, raises privacy risks if they can be linked back to households, and customers should give informed consent. Remote disconnection could be applied unfairly to vulnerable customers, such as those who rely on medical equipment or who cannot pay a bill, so strong safeguards and human review are needed before power is cut.',
+    [cr('Identifies a privacy issue arising from detailed usage data', 'privacy|reveal|when people are home|away|asleep|identif|re-?identif|linked|personal'),
+     cr('Identifies a fairness or safety issue with remote disconnection', ['disconnect|cut', 'vulnerable|medical|unfair|cannot pay|hardship|safety|fair']),
+     cr('Explains a safeguard or consequence', 'consent|safeguard|human review|oversight|policy|transparen|permission|protect')]),
+  written('Explain why a smart meter should verify a firmware update before installing it.', 3, 100,
+    'If meters installed any firmware that arrived over the network, an attacker could send malicious firmware that changes readings, disables the meter or opens a way into the network. Verifying a digital signature checks that the file came from Gridwise, and comparing its hash checks that it has not been altered in transit. Because the same update goes to millions of meters, one malicious update could affect the whole grid at once, so verification is essential.',
+    [cr('Explains the risk of installing malicious or altered firmware', 'malicious|attacker|altered|tamper|malware|compromis|unauthori[sz]ed'),
+     cr('Explains verification using a digital signature or hash', ['signature|hash|checksum|certificate', 'came from|source|authentic|altered|integrity|verif']),
+     cr('Explains the scale of the impact', 'millions|every meter|whole grid|all meters|at once|widespread|grid|large.scale')]),
+  rows('Match each threat to the measure that best prevents it.', [
+    ['An attacker types SQL into the portal\'s search box', 'Parameterised queries'],
+    ['A forged form submission arrives from another website', 'Anti-CSRF token'],
+    ['A customer edits the meter ID in the address bar to view another home\'s usage', 'Authorisation check on the server'],
+    ['A script saved in a nickname field runs in other customers\' browsers', 'Output encoding']],
+    ['Parameterised queries', 'Output encoding', 'Anti-CSRF token', 'Authorisation check on the server', 'Digital signature', 'Rate limiting'], 3, [4, 3, 2])]),
+Q(24, 'Automated demand response: impacts', `Gridwise introduces software that automatically delays household hot-water heaters and pool pumps for up to two hours when the grid is under strain. Customers who join receive a discount on their bills. The software learns each household's routine from its smart-meter data.`, [
+  written('Discuss the possible impacts of this system on customers and on the electricity grid.', 5, 170,
+    'Automatically shifting flexible loads reduces demand at peak times, which helps prevent blackouts and can lower costs for the grid, and customers who join receive a bill discount. However, the software learns each household\'s routine from meter data, which is sensitive because it shows when people are home. Households with specific needs, such as someone relying on heating or medical equipment, could be harmed if the system delays important loads, so customers need to be able to override it. There is also a risk of cyber-attack, because a large number of controllable devices could be switched off together to destabilise the grid. Overall the system is beneficial if participation is voluntary, data use is limited and there are overrides and strong security.',
+    [cr('Explains the benefit of reducing peak demand or lowering bills', ['peak|demand|strain|blackout|discount|bill|cost', 'reduce|lower|prevent|help|shift|save']),
+     cr('Explains privacy concerns about learning routines', 'privacy|routine|home|learn|sensitive|personal|meter data'),
+     cr('Explains the risk to households with particular needs or fairness', 'medical|vulnerable|need|override|unfair|fair|harm|comfort|rely'),
+     cr('Explains security or reliability risks of controllable devices', 'cyber|attack|hack|switch(ed)? off|destabilis|fail|reliab|security|together'),
+     cr('Reaches a balanced judgement or suggests safeguards', 'overall|however|on balance|provided|voluntary|safeguard|oversight|if')])]),
+Q(25, 'Unsupervised learning', `Gridwise wants to design new tariffs. It has two years of half-hourly usage records from 80,000 homes but no information about what type of household each one is.`, [
+  written('Explain how unsupervised learning could be used to group the homes. Include ONE positive and ONE negative impact of using the groups to set tariffs.', 5, 170,
+    'Unsupervised learning works with unlabelled data, so no one tells the algorithm which type of household each home is. A clustering algorithm, for example k-means, represents each home by its usage pattern and repeatedly assigns homes to the nearest group centre, adjusting the centres until homes within a group are similar to each other and different from other groups. Analysts then examine each cluster to decide what it represents, such as evening-peak families or daytime solar homes. A positive impact is that Gridwise can design tariffs that match real usage patterns, so customers who use power off-peak pay less. A negative impact is that households may be placed in a group that misrepresents them, or the groups may disadvantage a certain type of household, for example people who must be at home during the day, so the tariffs could be unfair.',
+    [cr('Explains that the data is unlabelled', 'unlabell?ed|no labels|not labelled|without labels|no one tells|no predefined|not told'),
+     cr('Explains that clustering groups homes by similarity of usage', ['cluster|k.means|group', 'similar|nearest|centre|center|pattern|usage']),
+     cr('Explains that people interpret what each cluster means', 'analyst|interpret|examine|decide what|human|label the groups|represent'),
+     cr('Explains a positive impact', 'tariff|match|pay less|cheaper|better|forecast|target|tailor|off.peak'),
+     cr('Explains a negative impact', 'misrepresent|unfair|disadvantag|stereotyp|wrong group|bias|discriminat|privacy|people who must')])]),
+Q(26, 'Python programming: peak demand periods', `Smart-meter readings for one day are combined into hourly totals.\n\nINPUT\nLine 1: T, the threshold in kWh (a whole number).\nLine 2: n, the number of records (0 or more).\nNext n lines: hour,kwh — two whole numbers separated by a comma.\n\nRULES\n• A record whose hour is not from 0 to 23 is ignored and counted.\n• Records for the same hour are added together. An hour with no records has a total of 0.\n• An hour is above the threshold if its total is greater than T.\n• A peak period is a run of consecutive hours that are all above the threshold. Runs do not wrap past midnight.\n\nOUTPUT\nLine 1: Hours above threshold: followed by a space and the number of hours above the threshold.\nLine 2: if no hour is above the threshold display No peak period; otherwise display Longest peak: A-B total=S where A and B are the first and last hour of the longest run (if there are several runs of the same length, use the earliest) and S is the sum of the hourly totals in that run.\nFinal line: only if any records were ignored, display Ignored records: followed by a space and the number ignored.\n\nEXAMPLE INPUT\n10\n7\n7,6\n8,12\n8,3\n9,11\n10,10\n18,14\n25,7\n\nEXAMPLE OUTPUT\nHours above threshold: 3\nLongest peak: 8-9 total=26\nIgnored records: 1`, [
+  python('Write a Python program that reads the input and produces the required output.', 5, '# Read T, n, then n records\n',
+    '@SAMPLE26@',
+    [{name:'Worked example', stdin:'10\n7\n7,6\n8,12\n8,3\n9,11\n10,10\n18,14\n25,7', expect:'Hours above threshold: 3\nLongest peak: 8-9 total=26\nIgnored records: 1'},
+     {name:'Equal-length runs: the earliest is used', stdin:'5\n4\n1,6\n2,6\n10,9\n11,9', expect:'Hours above threshold: 4\nLongest peak: 1-2 total=12'},
+     {name:'A total equal to the threshold is not above it', stdin:'10\n2\n5,10\n6,10', expect:'Hours above threshold: 0\nNo peak period'},
+     {name:'Records for the same hour are added', stdin:'10\n3\n3,6\n3,5\n4,1', expect:'Hours above threshold: 1\nLongest peak: 3-3 total=11'},
+     {name:'Runs do not wrap past midnight', stdin:'0\n3\n0,1\n23,2\n22,1', expect:'Hours above threshold: 3\nLongest peak: 22-23 total=3'},
+     {name:'Every hour above the threshold', stdin:'0\n24\n' + Array.from({length:24}, (_, h) => h + ',1').join('\n'), expect:'Hours above threshold: 24\nLongest peak: 0-23 total=24'},
+     {name:'No records', stdin:'5\n0', expect:'Hours above threshold: 0\nNo peak period'},
+     {name:'Only ignored records', stdin:'1\n2\n24,5\n-1,5', expect:'Hours above threshold: 0\nNo peak period\nIgnored records: 2'},
+     {name:'A longer later run beats shorter earlier runs', stdin:'2\n6\n1,3\n5,3\n6,3\n7,3\n9,3\n23,3', expect:'Hours above threshold: 6\nLongest peak: 5-7 total=9'},
+     {name:'Larger input (500 records)', stdin:'@LARGEIN@', expect:'@LARGEOUT@'}], {mutants:@MUT26@})]),
+Q(27, 'Evaluating machine learning for fault prediction', `Gridwise trained a model to predict which transformers will fail within 30 days so crews can replace them first.\n\n• Only 0.5% of transformers fail in any month, and the training data covered three years of mostly mild weather.\n• On test data the model found 85% of the transformers that failed, but only 40% of the transformers it flagged actually failed.\n• In a six-month trial, unplanned outages fell by 30%, but crews were repeatedly sent to transformers that were fine.\n• The model cannot explain why it flags a transformer, and the energy regulator requires utilities to justify safety-related maintenance decisions.`, [
+  written('Evaluate the effectiveness of using this machine-learning model to schedule transformer maintenance.', 6, 220,
+    'The model is effective in some respects: it finds 85% of failing transformers and the trial reduced unplanned outages by 30%, which improves reliability and safety. However, a precision of only 40% means that 60% of flagged transformers are fine, so crews are wasted on false alarms, and with failures this rare even a small error rate produces many of them. The training data covered three years of mostly mild weather, so the model may be unreliable in extreme heat or storms, which is when failures are most likely, and it should be retrained on more varied data. Because it cannot explain its flags, Gridwise cannot easily justify decisions to the regulator or check whether the model is biased towards certain areas. The model should therefore support rather than replace engineers, who verify each flag using inspection data and an explanation tool before sending crews. Overall it is partly effective: valuable for reducing outages but not yet reliable or transparent enough to be used on its own.',
+    [cr('Interprets the recall or outage-reduction evidence as a benefit', ['85|30%|recall|found|reduc|fell|improv', 'outage|failing|failure|reliab|safety']),
+     cr('Interprets the low precision and its cost', ['40%|precision|false alarm|false positive|fine|60%', 'wast|crew|cost|resource|sent']),
+     cr('Evaluates the limitation of rare events or unrepresentative training data', 'rare|0\\.5|mild weather|three years|extreme|storm|unrepresentative|more varied|retrain'),
+     cr('Evaluates the lack of explanation and the regulator\'s requirement', 'explain|regulator|justif|transparen|accountab|black box'),
+     cr('Recommends human oversight or another safeguard', 'engineer|verif|human|inspect|oversight|support rather|staged|trial|check'),
+     cr('Reaches a reasoned overall judgement', 'overall|partly|on balance|not yet|largely|effective in some|extent')])])
+]));
+}

@@ -1,0 +1,192 @@
+/* ---------- Paper 11 — Southern Cross Ground Station (generated from p11.tpl.js by gen/p11.py) ---------- */
+{
+const {mc, multi, rows, cr, written, python, sql, diagram, twoOf, Q, paper} = H;
+const ALERT = ['colou?r|icon|label', 'sound|tone|audible|audio', 'contrast|dark (theme|mode)|low.light|dim', 'text size|zoom|font size|resiz', 'keyboard|shortcut', 'aria|screen reader|semantic'];
+const sats = {name:'Satellites', columns:['SatID','Name','Orbit'], rows:[[1,'Aurora','LEO'],[2,'Boreas','LEO'],[3,'Cygnus','GEO']]};
+const passes = {name:'Passes', columns:['PassID','SatID','Station','Status'], rows:[
+  [1,1,'Perth','Completed'],[2,1,'Perth','Failed'],[3,2,'Perth','Completed'],[4,3,'Perth','Failed'],[5,2,'Perth','Failed'],[6,1,'Perth','Completed'],
+  [7,1,'Darwin','Completed'],[8,2,'Darwin','Completed'],[9,1,'Darwin','Failed'],[10,2,'Darwin','Completed'],[11,3,'Darwin','Completed'],
+  [12,1,'Hobart','Failed'],[13,2,'Hobart','Completed'],[14,2,'Hobart','Completed'],[15,3,'Hobart','Failed'],
+  [16,1,'Alice','Failed'],[17,2,'Alice','Failed']]};
+const passesHidden = [[1,1,'Perth','Failed'],[2,2,'Perth','Failed'],[3,1,'Perth','Failed'],[4,1,'Darwin','Completed'],[5,2,'Darwin','Completed'],[6,1,'Darwin','Completed'],
+  [7,1,'Hobart','Failed'],[8,2,'Hobart','Failed'],[9,1,'Hobart','Completed'],[10,2,'Hobart','Completed'],[11,3,'Alice','Failed'],[12,3,'Alice','Failed'],[13,3,'Alice','Completed'],
+  [14,1,'Cairns','Completed'],[15,2,'Cairns','Failed'],[16,1,'Cairns','Completed'],[17,1,'Esperance','Failed'],[18,2,'Esperance','Completed'],[19,1,'Esperance','Completed'],[20,2,'Esperance','Failed']];
+
+NEW.push(paper(11, 'Southern Cross Ground Station', 'Mission monitoring, telemetry integrity, secure uplink and machine learning', [
+Q(1, 'Data flow diagrams', `A level-0 data flow diagram for the ground-station software shows an arrow labelled "raw frames" going directly from the external entity "Satellite" to the data store "Telemetry Archive". There is no process between them.`, [
+  mc('What is wrong with this diagram?', ['Data stores cannot receive any data', 'An external entity cannot exchange data directly with a data store; the data must pass through a process', 'Arrows must be labelled with the name of a process rather than the data', 'Data stores must be drawn outside the system boundary'], 1, 'in a data flow diagram, data stores are only read or written by processes.')]),
+Q(2, 'String code tracing', `s = "ground-station-7"\nparts = s.split("-")\nprint(parts[1][::-1].upper(), len(parts), s.count("t"))`, [
+  mc('What does this program display?', ['STATION 3 2', 'NOITATS 2 2', 'NOITATS 3 2', 'NOITATS 3 1'], 2, 'parts is ["ground", "station", "7"]; "station" reversed is "noitats"; there are two letter t characters in the whole string.')]),
+Q(3, 'Cross-site scripting', `The search page of the mission portal displays "No results for: " followed by the value of the q parameter in the address. The server inserts the value into the HTML it sends without encoding it. An attacker emails an operator a link containing q=<script>…</script>. Nothing is stored on the server.`, [
+  mc('Which vulnerability does this describe?', ['Stored XSS', 'SQL injection', 'Cross-site request forgery', 'Reflected XSS'], 3, 'the script comes from the request itself and is immediately reflected back in the response; stored XSS would be saved and shown to later visitors.')]),
+Q(4, 'Searching sorted data', `One million telemetry records are held in an array sorted by timestamp. A program uses binary search to find the first record at or after a given time.`, [
+  mc('Approximately how many comparisons are needed?', ['About 20', 'About 1,000', 'About 500,000', 'About 1,000,000'], 0, 'each comparison halves the range, and 2^20 is just over one million.')]),
+Q(5, 'Availability targets', `The service agreement for the ground-station portal promises 99.9% availability over a 30-day month.`, [
+  mc('How much downtime in the month is allowed under this promise?', ['About 4 minutes', 'About 43 minutes', 'About 7 hours', 'About 72 hours'], 1, '0.1% of 30 × 24 × 60 = 43,200 minutes is about 43 minutes.')]),
+Q(6, 'Evaluating a machine-learning procedure', `A data scientist scales all features using the mean and standard deviation of the entire dataset, and only then splits it into training and test sets. The model scores 96% on the test set, but 81% on new live data.`, [
+  mc('Which flaw in the procedure most directly inflated the test score?', ['The test set was too large', 'The model had too few features', 'Data leakage: information from the test data influenced the scaling that was applied during training', 'Live data is always of lower quality'], 2, 'the test data should not influence any step of preparation; scaling statistics must come from the training set only.')]),
+Q(7, 'Database transactions', `A transfer of 500 credits between two mission budgets runs two statements: UPDATE budgets SET credits = credits - 500 WHERE id = 1; then UPDATE budgets SET credits = credits + 500 WHERE id = 2. The server crashes between the two statements. After restart budget 1 is down 500 and budget 2 is unchanged.`, [
+  mc('Which property was violated, and what prevents the problem?', ['Isolation, prevented by row locking', 'Durability, prevented by taking backups', 'Consistency alone, prevented by adding indexes', 'Atomicity, prevented by wrapping both updates in one transaction that commits or rolls back as a unit'], 3, 'atomicity means a transaction happens completely or not at all.')]),
+Q(8, 'Secure password reset', `The mission portal needs a link emailed to users that lets them reset a forgotten password.`, [
+  mc('Which token design is most secure?', ['A random single-use token that expires in 15 minutes and is stored on the server as a hash', 'The user ID encoded in Base64, so the link never changes', 'A sequential number valid for 30 days', 'A hash of the user\'s email address, so the server can recompute it'], 0, 'unpredictable, single-use, short-lived and stored hashed limits guessing, reuse and exposure if the database leaks.')]),
+Q(9, 'Verification and validation', '', [
+  rows('Classify each activity as verification or validation.', [['Reviewing the design document against the requirements specification', 'Verification'], ['Operators try the dashboard with a simulated satellite pass and confirm it supports their workflow', 'Validation'], ['Static analysis checks that the code follows the coding standard', 'Verification'], ['The agency confirms in a trial that the finished system meets the intended mission need', 'Validation']], ['Verification', 'Validation'], 1, [4])]),
+Q(10, 'REST principles', '', [
+  multi('Which statements about a REST API are correct? Select all that apply.', ['Each request contains all the information needed to process it', 'The server must remember the client\'s previous request to understand the next one', 'GET requests should not change stored data', 'A PUT request that sets a value can safely be repeated', 'POST must always be used for retrieving data'], [0, 2, 3], 'REST requests are stateless, GET is safe and PUT is idempotent.')]),
+Q(11, 'Avoiding overfitting', '', [
+  multi('Which actions help to reduce overfitting? Select all that apply.', ['Train on more varied examples', 'Train for many more epochs until the training loss is zero', 'Use a validation set to stop training when its loss starts to rise', 'Simplify the model or apply regularisation', 'Measure performance on the training set only'], [0, 2, 3], 'overfitting is memorising the training data; the remedies improve generalisation or limit model complexity.')]),
+Q(12, 'HTTP headers', '', [
+  rows('Select the header or attribute that matches each purpose.', [
+    ['Tells browsers to use only HTTPS for the site for a stated period', 'Strict-Transport-Security'],
+    ['Restricts the sources from which scripts and styles may be loaded', 'Content-Security-Policy'],
+    ['Prevents sensitive responses from being kept in caches', 'Cache-Control: no-store'],
+    ['Allows a page from another origin to read an API response', 'Access-Control-Allow-Origin'],
+    ['Carries the credentials in an API request', 'Authorization'],
+    ['Stops scripts on the page from reading the session cookie', 'Set-Cookie: HttpOnly']],
+    ['Strict-Transport-Security', 'Content-Security-Policy', 'Cache-Control: no-store', 'Access-Control-Allow-Origin', 'Authorization', 'Set-Cookie: HttpOnly'], 2, [6, 4])]),
+Q(13, 'Algorithm growth rates', '', [
+  rows('Select how the work grows with the number of readings, n, for each task.', [
+    ['Look up one telemetry value in a dictionary by its key', 'Constant time'],
+    ['Binary search for a time in a sorted array', 'Logarithmic'],
+    ['Scan every reading once to find the maximum', 'Linear'],
+    ['Compare every reading with every other reading using nested loops', 'Quadratic']],
+    ['Constant time', 'Logarithmic', 'Linear', 'Quadratic'], 2, [4, 2])]),
+Q(14, 'Idempotent operations', '', [
+  rows('Is each request idempotent?', [['PUT /satellites/5/status with the body {"mode": "safe"}', 'Idempotent'], ['POST /satellites/5/commands, which queues a new command each time it is sent', 'Not idempotent'], ['DELETE /satellites/5/commands/12', 'Idempotent']], ['Idempotent', 'Not idempotent'], 1, [3])]),
+Q(15, 'Attacks and change control', `The ground-station team changes the software that prepares commands for uplink. A faulty command could damage a satellite that cannot be repaired.`, [
+  rows('Match each description to the attack it describes.', [
+    ['An attacker secretly relays and alters messages between an operator and the ground station', 'Man-in-the-middle'],
+    ['Operators receive an email linking to a copy of the login page', 'Phishing'],
+    ['An attacker tries millions of password combinations against the login form', 'Brute force'],
+    ['Thousands of hijacked devices send requests so the telemetry API cannot respond', 'Denial of service'],
+    ['A caller pretending to be a vendor persuades staff to reveal a passcode', 'Social engineering'],
+    ['Crafted input alters the structure of a database query', 'SQL injection']],
+    ['Man-in-the-middle', 'Phishing', 'Brute force', 'Denial of service', 'Social engineering', 'SQL injection'], 3, [6, 5, 3]),
+  written('Explain how version control and code review together reduce the risk that a faulty change reaches the command system.', 3, 100,
+    'Version control records every change with its author, so a faulty uplink change can be traced and reverted to the last known good commit. Requiring a pull request means a second engineer reviews the changes before they are merged, which can catch logic errors, missing validation or unsafe parameter values that the author overlooked. Used together with automated tests on each pull request, the change is checked before it can reach the command system, reducing the chance that a faulty command is sent to a satellite that cannot be physically repaired.',
+    [cr('Explains that version control records or reverts changes', ['version control|repository|commit|history', 'revert|trace|roll ?back|last known|author|record']),
+     cr('Explains that review by a second person catches errors', ['pull request|code review|second engineer|reviewer|reviewed', 'error|validation|unsafe|overlook|catch|logic']),
+     cr('Links to the consequence of a faulty command reaching the satellite', 'satellite|cannot be (physically )?repaired|irreversible|uplink|command')])]),
+Q(16, 'Web architecture for a control-room dashboard', `Operators use a browser dashboard that shows live telemetry, alerts and a command console. It calls a REST API on application servers, which read a telemetry database. Operators, analysts and viewers have different permissions. The control room is dimly lit and noisy.`, [
+  written('Explain how a three-tier architecture improves the security and maintainability of the dashboard.', 3, 100,
+    'A three-tier architecture separates the presentation tier (the browser dashboard), the application tier (server logic and API) and the data tier (the telemetry database). The browser never connects to the database directly: every request goes through the application tier, which authenticates the user, validates the input and applies permissions, so a compromised browser or injected script cannot read or alter the data directly. Each tier can also be changed or scaled separately, for example adding application servers during a busy pass or replacing the dashboard framework without rewriting the database layer.',
+    [cr('Identifies the three tiers', ['presentation', 'application|logic', 'data tier|database']),
+     cr('Explains the security benefit of the application tier mediating access', ['application|server', 'authenticat|validat|permission|directly|never']),
+     cr('Explains the maintainability or scalability benefit', 'separate|scale|replace|independent|maintain|change')]),
+  written('Describe how role-based access control could be applied for operators, analysts and viewers.', 3, 100,
+    'Each user is assigned a role and permissions are attached to roles rather than to individuals. Operators can view telemetry and send commands, analysts can view and export telemetry but not send commands, and viewers can only see the dashboard. The application tier checks the role of the authenticated user on every request, for example before accepting a command upload, and refuses it with a 403 response if the role does not permit it. This applies least privilege and makes it simple to change someone\'s access by changing their role.',
+    [cr('Describes assigning roles with permissions', ['role', 'permission|can|cannot|allowed']),
+     cr('Describes the server checking the role on each request', ['server|application|every request|api', 'check|verif|enforce|403|refuse|deny']),
+     cr('Links to least privilege or ease of management', 'least privilege|only|cannot|simple|manage|change.*role')]),
+  written('Explain TWO ways the dashboard could be designed so that alerts are noticed in a dimly lit, noisy control room.', 3, 100,
+    'Alerts should not rely on colour alone: a critical alarm should also show an icon and a text label and sound a tone, so an operator with colour-blindness, or one who cannot hear the tone in a noisy room, still notices it. The dashboard should also offer a high-contrast dark theme with adjustable text size so that telemetry stays readable in a dim control room and for operators with low vision.',
+    [cr('Identifies a suitable design feature', ALERT.join('|')),
+     cr('Identifies a second, different design feature', twoOf(...ALERT)),
+     cr('Explains who benefits or under what conditions', 'colou?r.?blind|low vision|noisy|dim|control room|operator|cannot hear')])]),
+Q(17, 'Algorithm design', `The array Temps[1..n] holds the temperature readings of a satellite component in time order, and L is a limit. The value of n may be 0.`, [
+  written('Construct pseudocode that displays the length of the longest run of consecutive readings that are above L.', 3, 120,
+    'longest ← 0\ncurrent ← 0\nFOR i ← 1 TO n\n    IF Temps[i] > L THEN\n        current ← current + 1\n        IF current > longest THEN\n            longest ← current\n        ENDIF\n    ELSE\n        current ← 0\n    ENDIF\nENDFOR\nDISPLAY longest',
+    [cr('Uses a loop and compares each reading strictly with L', ['for|while|loop|repeat', '>\\s*L\\b'], '[a-z_\\]]+\\s*>=\\s*L\\b'),
+     cr('Counts the current run and resets it when a reading is not above L', ['current|run|count|streak', 'else|0|reset']),
+     cr('Updates and displays the longest run', ['longest|max|best', 'display|output|print'])])]),
+Q(18, 'Metadata and data mining', `Every telemetry frame includes metadata: the timestamp, the subsystem identifier and the component temperature. Years of frames from many satellites are archived.`, [
+  written('Explain how data mining of the archived telemetry could give early warning of a component failure.', 3, 90,
+    'Each frame has metadata such as the timestamp, subsystem identifier and component temperature. Data mining years of frames from many satellites can reveal patterns that came before past failures, for example a reaction wheel\'s current rising slowly over several weeks. The ground team can then compare live readings with those patterns and schedule maintenance or switch to a backup component before the failure happens.',
+    [cr('Identifies the metadata or archived frames used', 'metadata|timestamp|subsystem|identifier|frame|archive'),
+     cr('Explains that mining reveals patterns that precede failures', ['mining|mine', 'pattern|precede|before (past )?failure|trend|rise|rising|came before']),
+     cr('Explains using live readings to act early', 'live|compare|schedule|backup|early warning|before the failure|predict')])]),
+Q(19, 'Python programming: frame checksum', `A telemetry frame is exactly 8 hexadecimal characters (digits 0–9 and letters A–F, either capital or lower case). The last two characters are a checksum. The checksum is found by adding the values of the first six hexadecimal digits (A = 10, B = 11 ... F = 15), multiplying the sum by 7, and taking the remainder after dividing by 256, written as two lower-case hexadecimal digits.\n\nThe checks are made in this order, and the first problem found is reported:\n1. not 8 characters long: display Invalid length\n2. any character that is not a hexadecimal digit: display Invalid characters\n3. checksum wrong: display Checksum mismatch: expected followed by a space and the correct checksum\n4. otherwise display Valid\n\nExample: 1A2B3C11 is valid because 1 + 10 + 2 + 11 + 3 + 12 = 39, 39 × 7 = 273 and 273 mod 256 = 17, which is 11 in hexadecimal.`, [
+  python('Write a Python program that reads one frame and displays the result.', 3, '# Read one frame\n',
+    '@SAMPLE19@',
+    [{name:'Worked example', stdin:'1A2B3C11', expect:'Valid'},
+     {name:'Lower-case digits are accepted', stdin:'1a2b3c11', expect:'Valid'},
+     {name:'Checksum mismatch shows the expected value', stdin:'1A2B3C12', expect:'Checksum mismatch: expected 11'},
+     {name:'All F digits (sum 90 gives 76 hex)', stdin:'FFFFFF76', expect:'Valid'},
+     {name:'All zeros', stdin:'00000000', expect:'Valid'},
+     {name:'Expected checksum is padded to two digits', stdin:'00000100', expect:'Checksum mismatch: expected 07'},
+     {name:'Too short', stdin:'1A2B3C1', expect:'Invalid length'},
+     {name:'Too long', stdin:'1A2B3C111', expect:'Invalid length'},
+     {name:'Non-hexadecimal character', stdin:'1A2B3G11', expect:'Invalid characters'},
+     {name:'Length is checked before characters', stdin:'12G', expect:'Invalid length'},
+     {name:'Upper-case checksum letters are accepted', stdin:'A96000AF', expect:'Valid'},
+     {name:'Expected checksum is shown in lower case', stdin:'A9600000', expect:'Checksum mismatch: expected af'},
+     {name:'The checksum digits are also checked for characters', stdin:'1A2B3C1Z', expect:'Invalid characters'}], {mutants:@MUT19@})]),
+Q(20, 'Defensive command design', `Operators send commands such as "fire thruster for N seconds" or "de-orbit" through the command console. Once a satellite executes a command it may not be possible to undo it.`, [
+  written('Explain how parameter validation and two-person approval together reduce the risk of a damaging command being sent.', 3, 100,
+    'Before a command is accepted the server should validate each parameter\'s type and range, for example rejecting a thruster burn longer than the safe maximum, so malformed or dangerous values cannot be sent. High-risk commands such as de-orbit can also require approval from a second authorised operator, so one mistake or one compromised account cannot send them alone. This matters because a faulty command may be irreversible once the satellite executes it.',
+    [cr('Explains validating command parameters', ['validat', 'range|type|maximum|limit|parameter']),
+     cr('Explains approval by a second authorised person', 'second (authori[sz]ed )?(operator|person|engineer)|two.person|dual|approval from a second'),
+     cr('Links to irreversible consequences or single points of error', 'irreversible|cannot be (repaired|undone)|permanent|one mistake|compromised account|undo')])]),
+Q(21, 'SQL: percentages with a join', `Tables: Satellites and Passes. A pass is one attempt to communicate with a satellite from a ground station. Passes.SatID refers to Satellites.SatID. Status is Completed or Failed.`, [
+  sql('Construct a SQL query that considers only passes of satellites in a LEO orbit, and displays for each Station that has at least three such passes, the Station, the number of those passes and the percentage that Failed, rounded to one decimal place. List the stations from the highest to the lowest percentage.', 4, [sats, passes],
+    "SELECT p.Station, COUNT(*) AS Passes, ROUND(100.0 * SUM(CASE WHEN p.Status = 'Failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS FailedPercent FROM Passes p JOIN Satellites s ON s.SatID = p.SatID WHERE s.Orbit = 'LEO' GROUP BY p.Station HAVING COUNT(*) >= 3 ORDER BY FailedPercent DESC",
+    {orderKeys:[2], hidden:[{Passes:passesHidden}], weights:[0,2,1,1], expectedRows:[['Perth',5,40],['Hobart',3,33.3],['Darwin',4,25]]})]),
+Q(22, 'Object-oriented class modelling', `A mission-management system holds the following classes. Each box lists the attributes of one class.\n\nSatellite: id, name, massKg, altitudeKm\nRover: id, name, massKg, wheelCount\nProbe: id, name, massKg, targetBody\nGroundStation: id, name, latitude, longitude`, [
+  diagram('Construct a class diagram that uses inheritance to remove all redundant attributes. Add any additional classes you need, and show a suitable data type (for example str, int or float) for each attribute.', 3,
+    {classes:[
+      {name:'MissionAsset', alt:['Asset','Entity','MissionEntity','Item','Unit'], byAttrs:true, attrs:['id','name'], parent:null},
+      {name:'GroundStation', alt:['Ground Station','Station'], attrs:['latitude','longitude'], parent:'MissionAsset'},
+      {name:'Spacecraft', alt:['Craft','SpaceVehicle','Vehicle','SpaceAsset'], byAttrs:true, attrs:['massKg'], parent:'MissionAsset'},
+      {name:'Satellite', attrs:['altitudeKm'], parent:'Spacecraft'},
+      {name:'Rover', attrs:['wheelCount'], parent:'Spacecraft'},
+      {name:'Probe', attrs:['targetBody'], parent:'Spacecraft'}],
+     types:{id:'int', name:'str', latitude:'float', longitude:'float', massKg:'float', altitudeKm:'float', wheelCount:'int', targetBody:'str'}},
+    'MissionAsset (id: int, name: str)\n  ↑ GroundStation (latitude: float, longitude: float)\n  ↑ Spacecraft (massKg: float)\n      ↑ Satellite (altitudeKm: float)\n      ↑ Rover (wheelCount: int)\n      ↑ Probe (targetBody: str)')]),
+Q(23, 'Ethics, secure uplink and quality attributes', `Southern Cross sells high-resolution Earth-observation images to commercial customers and shares some telemetry with university partners. Commands are sent to satellites over a radio uplink that anyone with the right equipment could record.`, [
+  written('Outline potential social and ethical issues associated with selling the images.', 3, 90,
+    'High-resolution images can show people\'s homes and activities, so selling them raises privacy concerns, because a customer could use them to monitor individuals without their consent. Images of sensitive sites may also be dual-use, supporting harm if they are sold to the wrong customer, so the company needs clear policies on who may buy images and the maximum resolution that may be sold. Agreements with partners are also needed so that security-sensitive data is not leaked.',
+    [cr('Identifies privacy or surveillance concerns', 'privacy|homes|individuals|consent|monitor|surveill'),
+     cr('Identifies dual-use or misuse by a customer', 'dual.use|sensitive (site|location)|military|misuse|wrong customer|harm'),
+     cr('Explains a control such as a policy, licence or restriction', 'polic|agreement|restrict|resolution|control|licen')]),
+  written('Explain how the uplink commands can be protected from being read, forged or replayed.', 3, 100,
+    'Encrypting the command keeps its contents confidential, so someone recording the radio signal cannot learn what is being sent. A digital signature or message authentication code proves that the command came from an authorised ground station and has not been altered, and the satellite rejects any command that fails the check. Including a sequence number or timestamp stops an attacker replaying a recorded valid command.',
+    [cr('Explains encryption for confidentiality', 'encrypt|cipher|confidential'),
+     cr('Explains authenticity or integrity using a signature or code', 'signature|authentication code|\\bmac\\b|authentic|altered|tamper|authorised'),
+     cr('Explains protection against replay', 'replay|sequence number|timestamp|nonce|recorded|captured')]),
+  rows('Select the quality attribute that each statement describes.', [
+    ['The system keeps coping with 100 times more telemetry by adding servers', 'Scalability'],
+    ['New engineers can understand the code and change it safely', 'Maintainability'],
+    ['The ground segment is operating during 99.99% of scheduled contact time', 'Availability'],
+    ['An operator can complete an uplink with few errors and little training', 'Usability']],
+    ['Scalability', 'Maintainability', 'Availability', 'Usability', 'Reliability', 'Security'], 3, [4, 3, 2])]),
+Q(24, 'Autonomous manoeuvres: impacts', `A satellite operator introduces software that automatically fires a satellite's thrusters to avoid a predicted collision whenever the calculated probability of collision exceeds a threshold. It acts without waiting for a human decision, and the operator is told afterwards.`, [
+  written('Discuss the possible impacts of this system on the operator, its staff and the space environment.', 5, 170,
+    'Automatic manoeuvres can react within seconds to a predicted collision, which is faster than any human could, so the satellite is more likely to survive and less debris is created. However, a threshold that is too sensitive will trigger unnecessary manoeuvres, wasting limited fuel and shortening the satellite\'s life, while a model error could cause a manoeuvre that creates a collision risk. Operators who are only told afterwards may lose situational awareness and skills, and it is unclear who is accountable when a manoeuvre causes damage. If two operators\' satellites both manoeuvre without coordinating, they could manoeuvre into each other. Overall it is beneficial if there are limits on autonomy, human override and coordination between operators.',
+    [cr('Explains the benefit of faster response and less debris', ['fast|quick|seconds|react|response', 'surviv|debris|collision|safer|safety']),
+     cr('Explains false alarms, fuel use or model error', 'false (alarm|positive)|unnecessary|fuel|sensitive|threshold|model error|wrong|life'),
+     cr('Explains loss of awareness, skills or accountability for staff', 'awareness|skill|accountab|responsib|liab|told afterwards|deskill'),
+     cr('Explains the effect on the shared space environment or other operators', 'other operators|coordinat|debris|environment|both|each other|shared'),
+     cr('Reaches a balanced judgement or suggests safeguards', 'overall|however|on balance|override|limits|human|provided')])]),
+Q(25, 'Supervised learning: regression', `Southern Cross wants to predict how many more charge cycles a satellite battery will deliver before its capacity falls below 80%. It has records from 400 batteries: for each, the number of cycles completed, average operating temperature, average depth of discharge, and the number of cycles after which capacity actually fell below 80%.`, [
+  written('Explain how supervised learning could be used to build this predictor. Include ONE positive and ONE negative impact of using it.', 5, 170,
+    'This is a regression problem because the model must predict a number, the remaining cycles, rather than a category. Each battery\'s cycles completed, temperature and depth of discharge are the input features, and the known number of cycles until capacity fell below 80% is the label. During training the algorithm adjusts its parameters to reduce the difference between its predicted and actual values, and it is then evaluated on batteries it has not seen, for example by measuring the average error. A positive impact is that the operator can schedule a replacement or change operating mode before the battery fails, extending the mission. A negative impact is that, with only 400 batteries, the model may be inaccurate for unusual conditions, and operators who trust an overconfident prediction might delay action until too late.',
+    [cr('Explains that predicting a number is regression', 'regression|predict(s|ing)? a number|numeric|continuous|rather than a category'),
+     cr('Identifies features and the label', ['feature|input', 'label|known number|actual|target|capacity fell']),
+     cr('Explains training to reduce error and evaluation on unseen data', ['adjust|reduce|error|difference|train', 'unseen|not seen|held.out|test|average error|evaluat']),
+     cr('Explains a positive impact', 'schedule|replace|before (it|the battery) fail|extend|plan|early'),
+     cr('Explains a negative impact', 'inaccurate|unusual|only 400|small|overconfident|trust|too late|delay|bias')])]),
+Q(26, 'Python programming: contact windows', `Several ground stations record the periods during which they can communicate with a satellite. Times are minutes after midnight (0 to 1440).\n\nINPUT\nLine 1: n, the number of records (0 or more).\nNext n lines: station,start,end — fields may have spaces around them.\n\nRULES\n• A record is invalid if it does not have exactly three fields, if the station is empty, if start or end is not a whole number, or if start is less than 0, end is greater than 1440 or start is not less than end. Invalid records are counted and ignored.\n• Valid periods that overlap or touch (one ends exactly when another starts) are merged into one coverage period.\n\nOUTPUT\nIf there are no valid periods display No coverage. Otherwise display:\n• each coverage period on its own line as start-end, in time order\n• Covered: followed by a space, the total minutes covered and the word minutes\n• the longest gap, counting the time before the first period (from 0) and after the last (to 1440): Longest gap: followed by a space, its length, the word minutes, and the gap in brackets as (start-end). If several gaps are equally long use the earliest. If there is no gap at all display No gaps.\nFinally, if any records were invalid, display Invalid records: followed by a space and the count.\n\nEXAMPLE INPUT\n5\nGS1,60,180\nGS2,150,300\nGS3,300,360\nGS1,600,660\nGS2,700,650\n\nEXAMPLE OUTPUT\n60-360\n600-660\nCovered: 360 minutes\nLongest gap: 780 minutes (660-1440)\nInvalid records: 1`, [
+  python('Write a Python program that reads the input and produces the required output.', 5, '# Read n, then n records\n',
+    '@SAMPLE26@',
+    [{name:'Worked example', stdin:'5\nGS1,60,180\nGS2,150,300\nGS3,300,360\nGS1,600,660\nGS2,700,650', expect:'60-360\n600-660\nCovered: 360 minutes\nLongest gap: 780 minutes (660-1440)\nInvalid records: 1'},
+     {name:'One period inside another', stdin:'3\nA,100,500\nB,200,300\nC,250,260', expect:'100-500\nCovered: 400 minutes\nLongest gap: 940 minutes (500-1440)'},
+     {name:'Unsorted input', stdin:'3\nA,900,1000\nB,100,200\nC,500,600', expect:'100-200\n500-600\n900-1000\nCovered: 300 minutes\nLongest gap: 440 minutes (1000-1440)'},
+     {name:'Touching periods merge but a one-minute gap does not', stdin:'3\nA,0,100\nB,100,200\nC,201,300', expect:'0-200\n201-300\nCovered: 299 minutes\nLongest gap: 1140 minutes (300-1440)'},
+     {name:'Earliest gap used when gaps are equal', stdin:'2\nA,300,400\nB,700,1140', expect:'300-400\n700-1140\nCovered: 540 minutes\nLongest gap: 300 minutes (0-300)'},
+     {name:'Full-day coverage has no gaps', stdin:'2\nA,0,700\nB,700,1440', expect:'0-1440\nCovered: 1440 minutes\nNo gaps'},
+     {name:'Invalid record types and ranges', stdin:'6\nA,5,5\nB,-1,10\nC,10,1441\nD,x,20\n,1,2\nE,30,40', expect:'30-40\nCovered: 10 minutes\nLongest gap: 1400 minutes (40-1440)\nInvalid records: 5'},
+     {name:'Wrong number of fields; a station of only spaces is empty', stdin:'4\n A , 10 , 20 \nB,10\nC,1,2,3\n  ,5,9', expect:'10-20\nCovered: 10 minutes\nLongest gap: 1420 minutes (20-1440)\nInvalid records: 3'},
+     {name:'No records', stdin:'0', expect:'No coverage'},
+     {name:'Only invalid records', stdin:'2\nA,9,3\nbad', expect:'No coverage\nInvalid records: 2'},
+     {name:'Larger input (300 records)', stdin:'@LARGEIN@', expect:'@LARGEOUT@'}], {mutants:@MUT26@})]),
+Q(27, 'Evaluating an automated deployment pipeline', `The ground-station software team uses a pipeline that automatically deploys every change merged into the main branch to production. Review of a recent incident found that:\n• a change merged on a Friday removed range checks from command validation and was live for two hours before it was noticed\n• the pipeline ran unit tests, but none covered the command validator\n• all servers run in one cloud region; a regional outage later that month stopped operations for three hours, and restoring from backup took six hours against a target of one hour\n• the team now releases about ten times a week, compared with once a month before the pipeline.`, [
+  written('Evaluate the effectiveness of the team\'s deployment approach for safety-critical ground-station software.', 6, 220,
+    'The pipeline has clear benefits: releasing ten times a week instead of monthly means fixes and improvements reach operators quickly, and small changes are easier to review and roll back than large ones. However, the incident shows that automation has removed safeguards a safety-critical system needs. No test covered the command validator, so removing range checks passed unnoticed and was live for two hours, which could have sent a damaging command. The pipeline needs a test gate for safety-critical code, human review before merge, and staged rollout so a change reaches only a small part of the system first. Running in one region created a single point of failure and the recovery took six hours against a one-hour target, so the team needs multi-region redundancy and tested recovery. Overall the approach is effective for speed but not yet for safety: it is acceptable only if testing, review and redundancy are strengthened.',
+    [cr('Recognises the benefit of rapid, small releases', ['ten times|frequent|rapid|quickly|small changes|faster', 'release|fix|deploy|roll ?back|review']),
+     cr('Evaluates the missing test coverage of the validator', ['test|coverage|validator|range checks', 'gate|cover|safety.critical|unnoticed|damaging|none']),
+     cr('Evaluates the lack of review or staged rollout', 'review|staged|canary|gradual|approval|human|merge'),
+     cr('Evaluates the single-region risk and recovery target', ['single region|one (cloud )?region|single point|regional outage|redundan|multi.region', 'six hours|one.hour|recover|backup|target|restor']),
+     cr('Links the weaknesses to the consequences for safety-critical software', 'safety|damag|satellite|command|critical'),
+     cr('Reaches a reasoned judgement', 'overall|effective for|not yet|acceptable only|on balance|provided')])])
+]));
+}
