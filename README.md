@@ -4,7 +4,7 @@
 
 ## What's included
 
-- Separate, original practice examinations (the homepage counts them automatically). **27 questions and 80 marks each**, following the 2025 paper's overall allocation.
+- Five separate, original practice examinations. **27 questions and 80 marks each**, following the 2025 paper's overall allocation.
 - **10-minute reading phase** (browse, flag, highlight; answer controls locked), followed by a **140-minute working phase**. You can begin working early.
 - Single-choice, multiple-selection, dropdown/matching, pseudocode, short and extended writing, Python programming, SQL query writing and inheritance-diagram tasks.
 - **Python 3 IDE**: runs code and displays stdout/errors. Keep a draft, or explicitly **Attach code to question** for submission. At submission, attached programs are exercised with several inputs.
@@ -27,9 +27,9 @@ Then open `http://localhost:8000` in your browser. Alternatively, deploy this fo
 ## Marking and integrity
 
 - Multiple choice, multiple-selection and dropdown answers receive deterministic credit, including partial-credit thresholds for some matching tasks.
-- Python grading runs **attached** code against explicit test cases. Tests can assert **exact output** (`expect`), so a program that merely contains the right word no longer passes. Each test runs in a fresh namespace; `input()` raises `EOFError` when input runs out; marking suppresses `input()` prompts (the IDE still shows them); a test that loops forever is recorded as a timeout and the other tests still run, so partial credit survives. It is not a proof of correctness; unseen edge cases can still exist.
-- SQL questions can use several tables (with NULLs). The marker runs your query **and a reference query** on the visible data and on hidden datasets, then compares result *values*: column order and aliases are ignored, rows tied on the sort key may appear in any order, and joins, subqueries, `HAVING`, `CASE` and `AVG` are all fine. Hard-coded answers fail the hidden data. Papers 01–05 keep their original single-table analyser.
-- Class diagrams can be graded against a specification (classes, attribute homes, inheritance links, optional types; extra classes allowed; attribute spelling style ignored). Extended writing and class diagrams receive **indicative, rules-based scores**, not grades from a trained NESA human marker. The criteria can produce false positives or miss valid alternative phrasings. Review the example answers and evaluate your responses critically.
+- Python grading runs **attached** code against explicit execution cases. It is not a complete formal proof of program correctness; unseen edge cases can still exist.
+- SQL grading checks execution, grouped output, filtering, and ordering on a seeded database. An equivalent valid query may receive partial credit if it uses a technique outside the analyser's rules.
+- Extended writing and class diagrams receive **indicative, rules-based scores**, not grades from a trained NESA human marker. The criteria can produce false positives or miss valid alternative phrasings. Review the example answers and evaluate your responses critically.
 - Data is stored in your browser's `localStorage`. No exam answers are transmitted to a server operated by this project, but the third-party Python/SQL runtime scripts download over the internet. Clearing site data erases progress. JSON export is available from the results screen.
 - This is not an examination security tool or a cheating-prevention mechanism; it cannot prevent screenshots, switching tabs, external resources or unauthorised actions.
 
@@ -51,24 +51,6 @@ Official resources:
 - `styles.css`: desktop/responsive UI styles
 - `data.js`: five original exam question banks and associated criteria
 - `app.js`: exam UI, persistence, lab controls and marking rules
-- `python-worker.js`: isolated Python runner powered by Pyodide (per-test namespaces, exact stdout capture)
-- `tools/`: validation and regression tests (developer only)
+- `python-worker.js`: isolated, time-limited Python runner powered by Pyodide
 
 All files are plain HTML/CSS/JavaScript; no build step, account, API key, or app server is required.
-
-## Tests (developer)
-
-`tools/` contains Node scripts that exercise the real `app.js`, `python-worker.js` and `data.js` (jsdom + npm copies of Pyodide and sql.js; no browser needed):
-
-```bash
-cd tools && npm install
-node validate.js            # structure + every model answer through the real marking engine
-node engine-test.js         # Python / SQL / diagram / written marking regression tests
-node ui-test.js             # jsdom walkthrough: render, IDE, SQL lab, diagram, submit, persistence
-```
-
-Optional data fields are documented at the top of `data.js`. These scripts are not needed to run the website.
-
-## Authoring new papers
-
-Question data lives in `src/`: `legacy.js` (Papers 01–05), `common.js` (helpers) and one `pNN.js` per new paper. `node tools/build.js` concatenates them into `data.js`. Every paper is explicit data (no shared templates), is checked to have 27 questions and 80 marks when built, and `tools/validate.js` runs every model answer, Python mutant (deliberately wrong programs that must lose marks) and SQL hidden dataset through the real marking engine. Python `mutants` arrays are for validation only and are ignored by the website.
